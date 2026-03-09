@@ -22,7 +22,7 @@ In addition to `rss`, you can set
 
 ## Usage
 
-Listed items are markdown links and can be easily opened with `<C-x>` for example. `q` is window's internal key binding and closes it.
+Listed items are markdown links and can be easily opened with `gx` for example. `q` is window's internal key binding and closes it.
 
 ![Showcase](example.png)
 
