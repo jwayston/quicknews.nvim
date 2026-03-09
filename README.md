@@ -2,6 +2,8 @@
 
 A plugin to show a quick popup window of most recent RSS feed items. A nifty tool if you want stay up to date with the most recent news of your choice.
 
+![Showcase](example.png)
+
 ## Install
 
 ```nvim
@@ -22,7 +24,7 @@ In addition to `rss`, you can set
 
 ## Usage
 
-Listed items are markdown links and can be easily opened with `gx` for example. `q` is window's internal key binding and closes it.
+Triggering `:QuickNews` or `require("quicknews").get_news()` fetches the RSS feed and presents parsed results in a popup window. Fetching is done by calling `curl`.
 
-![Showcase](example.png)
+Listed titles are markdown links and can be easily opened with `gx` for example. `q` is window's internal key binding and makes it quit.
 
