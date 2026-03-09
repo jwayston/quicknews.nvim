@@ -42,6 +42,7 @@ local open_scratch_win = function()
 
     local buf = vim.api.nvim_create_buf(false, true)
     local win = vim.api.nvim_open_win(buf, true, win_opts)
+    vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
 
     vim.bo[buf].buftype = "nofile"
     vim.bo[buf].filetype = "markdown"
