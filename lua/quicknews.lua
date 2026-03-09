@@ -7,42 +7,46 @@
 --- @class QuickNews
 local M = {}
 
+local namespace = vim.api.nvim_create_namespace("QuickNews")
+local win_opts = {
+    relative = "editor",
+    col = 0,
+    width = vim.o.columns,
+    style = "minimal",
+}
+
 --- @class Config
---- @field rss string RSS feed URL
---- @field height number Window height
---- @field title string Window title
---- @field max_items number Max items to show
 M.config = {
-    height = 10,
-    max_items = 10,
+    rss = nil,               -- RSS feed url
+    height = 10,             -- Window height
+    max_items = 10,          -- Max RSS feed items to show
+    title = nil,             -- Window title, nil uses RSS feed's channel title
+    style = {
+        underline = false    -- Force link underline removal
+    }
 }
 
 --- @param opts Config?
 M.setup = function(opts)
     M.config = vim.tbl_deep_extend("force", M.config, opts or {})
-    if not M.config.rss then print("Error: missing RSS feed url") return end
 
     vim.api.nvim_create_user_command("QuickNews",
         function() M.get_news() end, { desc = "Show a RSS news popup" })
+
+    vim.api.nvim_set_hl(namespace, "Underlined", { underline = M.config.style.underline })
+    win_opts.height = M.config.height
+    win_opts.row = vim.o.lines - win_opts.height
 end
 
 --- Open a floating scratch popup window above the command line
 --- @return number buf The buffer id
 --- @return number win The window id
 local open_scratch_win = function()
-    local win_opts = {
-        relative = "editor",
-        col = 0,
-        width = vim.o.columns,
-        style = "minimal",
-        height = M.config.height,
-        row = vim.o.lines - M.config.height,
-        title = M.config.title
-    }
-
     local buf = vim.api.nvim_create_buf(false, true)
     local win = vim.api.nvim_open_win(buf, true, win_opts)
+
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
+    vim.api.nvim_win_set_hl_ns(win, namespace)
 
     vim.bo[buf].buftype = "nofile"
     vim.bo[buf].filetype = "markdown"
@@ -64,7 +68,7 @@ local parse_rss_data = function(data)
                     [[\<link\>([^<]+)\<\/link\>]] ..
                     [[.{-}\<pubDate\>([^<]+)\<\/pubDate\>]]
 
-    M.config.title = M.config.title or
+    win_opts.title = M.config.title or
         data:match("<channel><title>(.-)</title>") or ""
 
     local matches = vim.fn.matchstrlist({data}, r_item, {submatches = true})
@@ -89,7 +93,10 @@ end
 
 --- Get and show news from the RSS stream in a floating window
 M.get_news = function()
-    if not M.config.rss then return end
+    if not M.config.rss then
+        print("Error: RSS feed url not set")
+        return
+    end
 
     local o = vim.system({ "curl", "-s", M.config.rss }, { text = true }):wait()
     if o.code ~= 0 then

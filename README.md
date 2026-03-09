@@ -17,10 +17,19 @@ vim.keymap.set("n", "<leader>nn", ":QuickNews<CR>", { silent = true })
 
 ```
 
-In addition to `rss`, you can set
-- `height` to change popup window height (default 10)
-- `title` if you don't like the RSS channel title
-- `max_items` to limit how many news items are shown (default 10). 0 stands for no limits
+Default values:
+
+```nvim
+require("quicknews").setup({
+    rss = nil,               -- RSS feed url
+    height = 10,             -- Window height
+    max_items = 10,          -- Max RSS feed items to show
+    title = nil,             -- Window title, nil uses RSS feed's channel title
+    style = {
+        underline = false    -- Force link underline removal
+    }
+})
+```
 
 ## Usage
 
