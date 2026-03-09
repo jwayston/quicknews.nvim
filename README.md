@@ -16,7 +16,7 @@ vim.keymap.set("n", "<leader>nn", ":QuickNews<CR>", { silent = true })
 ```
 
 In addition to `rss`, you can set
-- `height` to bypass window default height (default 10)
+- `height` to change popup window height (default 10)
 - `title` if you don't like the RSS channel title
 - `max_items` to limit how many news items are shown (default 10). 0 stands for no limits
 
