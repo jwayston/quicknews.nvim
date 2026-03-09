@@ -2,9 +2,9 @@
 
 A plugin to show a quick popup window of most recent RSS feed items. A nifty tool if you want stay up to date with the most recent news of your choice.
 
-## Install and usage
+## Install
 
-```text
+```nvim
 vim.pack.add { "https://github.com/jwayston/quicknews.nvim" }
 
 require("quicknews").setup({
@@ -19,4 +19,10 @@ In addition to `rss`, you can set
 - `height` to bypass window default height (default 10)
 - `title` if you don't like the RSS channel title
 - `max_items` to limit how many news items are shown (default 10). 0 stands for no limits
+
+## Usage
+
+Listed items are markdown links and can be easily opened with `<C-x>` for example. `q` is window's internal key binding and closes it.
+
+![Showcase](example.png)
 
