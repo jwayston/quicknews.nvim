@@ -6,7 +6,7 @@ A plugin to show a quick popup window of most recent RSS feed items. A nifty too
 
 ## Install
 
-```nvim
+```lua
 vim.pack.add { "https://github.com/jwayston/quicknews.nvim" }
 
 require("quicknews").setup({
@@ -19,7 +19,7 @@ vim.keymap.set("n", "<leader>nn", ":QuickNews<CR>", { silent = true })
 
 Default values:
 
-```nvim
+```lua
 require("quicknews").setup({
     rss = nil,               -- RSS feed url
     height = 10,             -- Window height
