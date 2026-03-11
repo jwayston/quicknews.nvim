@@ -7,6 +7,7 @@
 --- @class QuickNews
 local M = {}
 
+local notify = vim.notify or print
 local namespace = vim.api.nvim_create_namespace("QuickNews")
 local win_opts = {
     relative = "editor",
@@ -36,6 +37,12 @@ M.setup = function(opts)
     vim.api.nvim_set_hl(namespace, "Underlined", { underline = M.config.style.underline })
     win_opts.height = M.config.height
     win_opts.row = vim.o.lines - win_opts.height
+end
+
+--- Print error message
+--- @param msg string Message
+local show_err = function(msg)
+    vim.notify("[QuickNews] Error: " .. msg, vim.log.levels.ERROR)
 end
 
 --- Open a floating scratch popup window above the command line
@@ -93,19 +100,18 @@ end
 
 --- Get and show news from the RSS stream in a floating window
 M.get_news = function()
-    if not M.config.rss then
-        print("Error: RSS feed url not set")
+    if not M.config.rss then show_err("RSS feed url not set") return end
+
+    local o = vim.system({ "curl", "-sf", M.config.rss }, { text = true }):wait()
+    if o.code ~= 0 then
+        show_err(string.format("fetch failed (code %d): %s", o.code, M.config.rss))
         return
     end
 
-    local o = vim.system({ "curl", "-s", M.config.rss }, { text = true }):wait()
-    if o.code ~= 0 then
-        print("Curl fetch error: " .. M.config.rss)
-        return
-    end
+    if not o.stdout then show_err("Empty RSS feed") return end
 
     local news = parse_rss_data(o.stdout)
-    if not news then news = { "Error parsing RSS feed or feed empty" } end
+    if not news then show_err("RSS parsing failed") return end
 
     local b, w = open_scratch_win()
     vim.api.nvim_buf_set_lines(b, 0, -1, false, news)
