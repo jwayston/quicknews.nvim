@@ -36,7 +36,7 @@ end
 
 --- Parse the RSS feed
 --- @param data string Rss raw feed data
---- @return string[] # <title, list of parsed & formatted news strings>
+--- @return table # { title: string, items: string[] }
 M.parse_rss_data = function(config, data)
     data = data:gsub("<!%[CDATA%[(.-)%]%]>", "%1")  -- Remove CDATA slop
     local result = { title = nil, items = {} }
@@ -69,7 +69,7 @@ end
 --- Process data pipeline
 --- @param config table Configuration table passed from plugin setup
 --- @param raw_rss_data string Raw RSS data
---- @return string[]|nil # Processed list of news items strings or nil on error
+--- @return table|nil # { title: string, items: string[] }
 M.process_data = function(config, raw_rss_data)
     assert(config and raw_rss_data,
         "utils.process_data(): config and raw_rss_data are mandatory")

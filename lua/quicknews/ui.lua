@@ -1,7 +1,8 @@
-local utils = require("quicknews.utils")
 local M = {}
 
 --- Open a floating scratch popup window above the command line
+--- @param namespace number Namespace id
+--- @param config table Configuration table passed from plugin setup
 --- @param opts table Window options
 --- @return number buf The buffer id
 --- @return number win The window id
@@ -36,6 +37,10 @@ local open_scratch_win = function(namespace, config, opts)
     return buf, win
 end
 
+--- Colorize the buffer's contents
+--- @param buf number Buffer id
+--- @param namespace number Namespace id
+--- @param pre_buf_data string[] List of strings. Should be identical to buffer's contents
 local colorize_buf = function(buf, namespace, pre_buf_data)
     for i, line in ipairs(pre_buf_data) do
         local line_idx = i - 1
@@ -62,21 +67,21 @@ end
 --- Render the UI
 --- @param namespace number Neovim namespace id 
 --- @param config table Configuration table passed from plugin setup
---- @param news_items string[] List of processed news strings
-M.render = function(namespace, config, news_items)
+--- @param news table The parsed RSS object { title: string, items: string[] }
+M.render = function(namespace, config, news)
     assert(namespace and config,
         "ui.render(): namespace or config not provided")
 
     vim.api.nvim_echo({{ "" }}, false, {})  -- Clear command line area
 
     local b, w = open_scratch_win(namespace, config, {
-        title = config.title or news_items.title or "Latest news"
+        title = config.title or news.title or "Latest news"
     })
 
-    vim.api.nvim_buf_set_lines(b, 0, -1, false, news_items.items)
+    vim.api.nvim_buf_set_lines(b, 0, -1, false, news.items)
     vim.api.nvim_win_set_cursor(w, { 1, 15 })
 
-    colorize_buf(b, namespace, news_items.items)
+    colorize_buf(b, namespace, news.items)
 end
 
 return M

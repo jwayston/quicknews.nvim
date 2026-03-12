@@ -20,7 +20,7 @@ M._reload = function()
 end
 
 --- Setup the plugin
---- @param opts table Plugin options. See README for info
+--- @param opts table Plugin options. See quicknews.config module for example
 M.setup = function(opts)
     opts = opts or {}
 
@@ -51,7 +51,7 @@ local lazy_init = function()
     M._initialized = true
 end
 
---- Get and show news from the RSS stream in a floating window
+--- Receive news from a RSS stream and show them in a floating window
 M.get_news = function()
     lazy_init()
     if not M.config.rss then utils.show_err("RSS feed url not set") return end
