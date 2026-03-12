@@ -6,28 +6,34 @@
 
 --- @class QuickNews
 local M = {}
+local config = require("quicknews.config")
 
-local namespace = vim.api.nvim_create_namespace("QuickNews")
-
---- @class Config
-M.config = {
-    rss = nil,               -- RSS feed url
-    height = 10,             -- Window height
-    max_items = 10,          -- Max RSS feed items to show
-    title = nil,             -- Window title, nil uses RSS feed's channel title
-    style = {
-        underline = false    -- Force link underline removal
-    }
-}
-
---- @param opts Config?
 M.setup = function(opts)
-    M.config = vim.tbl_deep_extend("force", M.config, opts or {})
+    opts = opts or {}
 
-    vim.api.nvim_create_user_command("QuickNews",
-        function() M.get_news() end, { desc = "Show a RSS news popup" })
+    M.config = vim.tbl_deep_extend("force", config.defaults, opts)
 
-    vim.api.nvim_set_hl(namespace, "Underlined", { underline = M.config.style.underline })
+    vim.validate({
+        rss = { M.config.rss, "string" },
+        height = { M.config.height, "number" },
+        max_items = { M.config.max_items, "number" },
+        title = { M.config.title, "string", true },
+        ["style.underline"] = { M.config.style.underline, "boolean" }
+    })
+
+    vim.api.nvim_create_user_command("QuickNews", function()
+        M.get_news() end,
+    {})
+end
+
+--- Lazy init operations
+local lazy_init = function()
+    if M._initialized then return end
+    M.namespace = vim.api.nvim_create_namespace("QuickNews")
+    vim.api.nvim_set_hl(M.namespace, "Underlined", {
+        underline = M.config.style.underline
+    })
+    M._initialized = true
 end
 
 --- Print error message
@@ -62,7 +68,7 @@ local open_scratch_win = function(opts)
     local win = vim.api.nvim_open_win(buf, true, win_opts)
 
     vim.api.nvim_set_option_value("bufhidden", "wipe", { buf = buf })
-    vim.api.nvim_win_set_hl_ns(win, namespace)
+    vim.api.nvim_win_set_hl_ns(win, M.namespace)
 
     vim.bo[buf].buftype = "nofile"
     vim.bo[buf].filetype = "markdown"
@@ -108,6 +114,7 @@ end
 
 --- Get and show news from the RSS stream in a floating window
 M.get_news = function()
+    lazy_init()
     if not M.config.rss then show_err("RSS feed url not set") return end
 
     show_info("Fetching latest news...")
