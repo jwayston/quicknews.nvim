@@ -35,5 +35,9 @@ require("quicknews").setup({
 
 Triggering `:QuickNews` or `require("quicknews").get_news()` fetches the RSS feed and presents parsed results in a popup window. Fetching is done by calling `curl`.
 
-Listed titles are markdown links and can be easily opened with `gx` for example. `q` is window's internal key binding and makes it quit.
+Listed titles are markdown links and can be easily opened with `gx` for example.
+
+Internal keybindings of the popup window:
+- `q`: close popup
+- `<CR>`: open the link on current line using external app (just a convenience binding for `gx`)
 
