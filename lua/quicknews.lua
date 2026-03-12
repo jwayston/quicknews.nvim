@@ -37,6 +37,13 @@ local show_err = function(msg)
     notify("[QuickNews] Error: " .. msg, vim.log.levels.ERROR)
 end
 
+--- Print info message
+--- @param msg string Message
+local show_info = function(msg)
+    local notify = vim.notify or print
+    notify("[QuickNews] " .. msg, vim.log.levels.INFO)
+end
+
 --- Open a floating scratch popup window above the command line
 --- @param opts table Window options
 --- @return number buf The buffer id
@@ -103,20 +110,34 @@ end
 M.get_news = function()
     if not M.config.rss then show_err("RSS feed url not set") return end
 
-    local o = vim.system({ "curl", "-sf", M.config.rss }, { text = true }):wait()
-    if o.code ~= 0 then
-        show_err(string.format("fetch failed (code %d): %s", o.code, M.config.rss))
-        return
-    end
+    show_info("Fetching latest news...")
 
-    if not o.stdout then show_err("Empty RSS feed") return end
+    vim.system({ "curl", "-sf", M.config.rss }, { text = true }, function (o)
+        vim.schedule(function()
+            if o.code ~= 0 then
+                show_err(string.format("fetch failed (code %d): %s", o.code, M.config.rss))
+                return
+            end
 
-    local news = parse_rss_data(o.stdout)
-    if not news.items then show_err("RSS parsing failed") return end
+            if not o.stdout or o.stdout == "" then
+                show_err("Empty RSS feed")
+                return
+            end
 
-    local b, w = open_scratch_win({ title = M.config.title or news.title })
-    vim.api.nvim_buf_set_lines(b, 0, -1, false, news.items)
-    vim.api.nvim_win_set_cursor(w, {1, 15})
+            local news = parse_rss_data(o.stdout)
+            if not news or not news.items or #news.items == 0 then
+                show_err("RSS parsing failed or no items found")
+                return
+            end
+
+            vim.api.nvim_echo({{ "" }}, false, {})  -- Clear command line area
+
+            local b, w = open_scratch_win({ title = M.config.title or news.title })
+            vim.api.nvim_buf_set_lines(b, 0, -1, false, news.items)
+            vim.api.nvim_win_set_cursor(w, { 1, 15 })
+        end)
+    end)
+
 end
 
 return M
