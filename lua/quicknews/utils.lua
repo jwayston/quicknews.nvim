@@ -14,6 +14,13 @@ M.show_info = function(msg)
     notify("[QuickNews] " .. msg, vim.log.levels.INFO)
 end
 
+--- Extracts url from a text line containing a markdown link
+--- @param line string Text line
+--- @return string|nil # Url or nil on error
+M.md_link_extract_url = function(line)
+    return line:match("%]%((.-)%)")
+end
+
 --- Check the output of calling external programs using system()
 --- @param prog_name string Name of the called program
 --- @param call_output vim.SystemCompleted SystemCompleted 
@@ -39,24 +46,32 @@ end
 --- @return table # { title: string, items: string[] }
 M.parse_rss_data = function(config, data)
     data = data:gsub("<!%[CDATA%[(.-)%]%]>", "%1")  -- Remove CDATA slop
+    local link_section_width = 20
     local result = { title = nil, items = {} }
-    local headline_max_width = vim.o.columns - 20
+    local headline_max_width = vim.o.columns - link_section_width
 
     local channel_block = data:match("<channel>(.-)</channel>")
-    result.title = channel_block:match("<title>(.-)</title>") or nil
+    if channel_block then
+        result.title = channel_block:match("<title>(.-)</title>") or nil
+    end
     local matches = data:gmatch("<item>(.-)</item>")
 
     local i = 1
     for item_block in matches do
+        local timestamp = ""
         local title = item_block:match("<title>(.-)</title>")
         local link = item_block:match("<link>(.-)</link>")
         local datetime = item_block:match("<pubDate>(.-)</pubDate>")
-        local unixtime = vim.fn.strptime("%a, %d %b %Y %T", datetime)
-        local timestamp = os.date("%y-%m-%d %H:%M", unixtime)
+
+        if not title or not link then return result end
+        if datetime and datetime ~= "" then
+            local unixtime = vim.fn.strptime("%a, %d %b %Y %T", datetime)
+            timestamp = os.date("%y-%m-%d %H:%M", unixtime) .. " "
+        end
 
         title = #title > headline_max_width and
             (vim.fn.strcharpart(title, 0, headline_max_width) .. "...") or title
-        table.insert(result.items, string.format("%s [%s](%s)", timestamp, title, link))
+        table.insert(result.items, string.format("%s[%s](%s)", timestamp, title, link))
 
         if i >= config.max_items then break end
         i = i + 1

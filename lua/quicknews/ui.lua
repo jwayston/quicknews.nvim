@@ -1,5 +1,7 @@
 local M = {}
 
+local utils = require("quicknews.utils")
+
 --- Open a floating scratch popup window above the command line
 --- @param namespace number Namespace id
 --- @param config table Configuration table passed from plugin setup
@@ -31,7 +33,7 @@ local open_scratch_win = function(namespace, config, opts)
     vim.keymap.set("n", "q", ":close<CR>", { buffer = buf, silent = true })
     vim.keymap.set("n", "<CR>", function()
         local line = vim.api.nvim_get_current_line()
-        local url = line:match("%]%((.-)%)")
+        local url = md_link_extract_url(line)
         if url then vim.ui.open(url) end
     end, { buffer = buf, silent = true })
     return buf, win
