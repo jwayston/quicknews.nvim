@@ -33,7 +33,7 @@ local open_scratch_win = function(namespace, config, opts)
     vim.keymap.set("n", "q", ":close<CR>", { buffer = buf, silent = true })
     vim.keymap.set("n", "<CR>", function()
         local line = vim.api.nvim_get_current_line()
-        local url = md_link_extract_url(line)
+        local url = utils.md_link_extract_url(line)
         if url then vim.ui.open(url) end
     end, { buffer = buf, silent = true })
     return buf, win
