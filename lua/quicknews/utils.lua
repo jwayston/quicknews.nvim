@@ -57,6 +57,7 @@ M.parse_rss_data = function(config, data)
     local matches = data:gmatch("<item>(.-)</item>")
 
     local i = 1
+    local months = {Jan=1, Feb=2, Mar=3, Apr=4, May=5, Jun=6, Jul=7, Aug=8, Sep=9, Oct=10, Nov=11, Dec=12}
     for item_block in matches do
         local timestamp = ""
         local title = item_block:match("<title>(.-)</title>")
@@ -65,8 +66,8 @@ M.parse_rss_data = function(config, data)
 
         if not title or not link then return result end
         if datetime and datetime ~= "" then
-            local unixtime = vim.fn.strptime("%a, %d %b %Y %T", datetime)
-            timestamp = os.date("%y-%m-%d %H:%M", unixtime) .. " "
+	    local day, month_str, year, hour, min, sec = datetime:match("%a+, (%d+) (%a+) (%d+) (%d+):(%d+):(%d+)")
+	    timestamp = string.format("%s-%02d-%s %s:%s ", year, months[month_str], day, hour, min)
         end
 
         title = #title > headline_max_width and

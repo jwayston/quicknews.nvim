@@ -49,7 +49,7 @@ local colorize_buf = function(buf, namespace, pre_buf_data)
 
         --- Timestamp higlight
         vim.api.nvim_buf_set_extmark(buf, namespace, line_idx, 0, {
-            end_col = 14,
+            end_col = 16,
             hl_group = "Comment",
         })
 
@@ -81,7 +81,7 @@ M.render = function(namespace, config, news)
     })
 
     vim.api.nvim_buf_set_lines(b, 0, -1, false, news.items)
-    vim.api.nvim_win_set_cursor(w, { 1, 15 })
+    vim.api.nvim_win_set_cursor(w, { 1, 17 })
 
     colorize_buf(b, namespace, news.items)
 end
